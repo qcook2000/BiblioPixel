@@ -38,6 +38,7 @@ def _make_layout(layout, driver=None, drivers=None, maker=None):
 
         drivers = [make_driver(**d) for d in drivers]
         coord_map = coord_map or build.map
+        coord_map = None
 
     maker = data_maker.Maker(**(maker or {}))
     return _make_object(drivers, coordMap=coord_map, maker=maker, **layout)
