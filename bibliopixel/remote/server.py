@@ -28,6 +28,7 @@ class RemoteServer:
         self.app.route('/')(self.index)
         self.app.route('/<path:path>')(self.static_files)
         self.app.route('/run_animation/<string:animation>')(self.run_animation)
+        self.app.route('/set_color_animation/<string:r>/<string:g>/<string:b>/<string:type>')(self.set_color_animation)
         self.app.route('/stop')(self.stop_animation)
         self.app.route('/api/<string:request>')(self.api)
         self.app.route('/api/<string:request>/<data>')(self.api)
@@ -40,6 +41,10 @@ class RemoteServer:
 
     def run_animation(self, animation):
         return self.api('run_animation', data=animation)
+
+    def set_color_animation(self, r, g, b, type):
+        log.info("setcolor" + r + g + b + type)
+        return self.api('set_color_animation', data=r + '/' + g + '/' + b + '/' + type)
 
     def stop_animation(self):
         return self.api('stop_animation')

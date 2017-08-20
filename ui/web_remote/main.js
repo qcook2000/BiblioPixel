@@ -120,6 +120,8 @@ function do_main(){
             });
             $('#overlay').click(dissmiss_error);
 
+            setupColorPicker();
+
             hide_loading();
         }
         else{
@@ -166,6 +168,42 @@ function stop_animation(name, id){
     show_btn_loading(id);
     call_api(
         '/stop',
+        success,
+        api_error
+    );
+}
+
+function setupColorPicker() {
+    var canvas = document.getElementById("colorPicker");
+    var context = canvas.getContext("2d");
+
+    var imageObj = new Image();
+    imageObj.src = "/colormap.png";
+    imageObj.onload = function(){
+        context.drawImage(imageObj, 0, 0, imageObj.naturalWidth, imageObj.naturalHeight, 0, 0, 640, 512);
+    };
+
+    canvas.onmousemove = function(e) {
+        var r = canvas.getBoundingClientRect();
+        var color = context.getImageData((e.clientX - r.left), e.clientY - r.top, 1, 1).data;
+        setColorAnimation(color[0], color[1], color[2], 'fullStrip');
+    }
+}
+
+function setColorAnimation(r, g, b, type){
+    var success = function(data){
+        console.log('Success:' + r + '/' + g + '/' + b + '/' + type)
+        if(data.status){
+            //console.log(data);
+        }
+        else{
+            api_error(data.msg);
+        }
+
+    }
+
+    call_api(
+        '/set_color_animation/' + r + '/' + g + '/' + b + '/' + type,
         success,
         api_error
     );

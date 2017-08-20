@@ -110,6 +110,7 @@ class RemoteControl(collection.Collection):
 
         self.handlers = {
             'run_animation': self.run_animation,
+            'set_color_animation': self.set_color_animation,
             'stop_animation': self.stop_animation,
             'get_config': self.get_config,
             'trigger_animation': self.run_animation,
@@ -161,6 +162,23 @@ class RemoteControl(collection.Collection):
         log.info('Running animation: {}'.format(name))
         self.index = self.name_map[name]
         self.current_animation.start()
+        return True, None
+
+    def set_color_animation(self, data):
+        # if name is None:
+        #     name = self.default
+
+        # if name not in self.name_map:
+        #     return False, 'Invalid animation name: {}'.format(name)
+
+        # if self.current_animation:
+        #     self.current_animation.cleanup(clean_layout=False)
+        #     self.index = -1
+        args = data.split('/')
+
+        log.info('Color: [' + args[0] + ',' + args[1] + ',' + args[2] + '], Type: ' + args[3])
+        # self.index = self.name_map[name]
+        # self.current_animation.start()
         return True, None
 
     def stop_animation(self, data):
