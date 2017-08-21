@@ -43,7 +43,6 @@ class RemoteServer:
         return self.api('run_animation', data=animation)
 
     def set_color_animation(self, r, g, b, type):
-        log.info("setcolor" + r + g + b + type)
         return self.api('set_color_animation', data=r + '/' + g + '/' + b + '/' + type)
 
     def stop_animation(self):

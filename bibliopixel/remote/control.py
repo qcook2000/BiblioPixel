@@ -4,6 +4,7 @@ from .. animation import collection
 from . import server
 from . import trigger_process
 from .. util import log
+import uuid
 
 
 DEFAULT_OFF = 'OFF_ANIM'
@@ -52,6 +53,8 @@ class RemoteControl(collection.Collection):
 
         super().__init__(layout, copy.deepcopy(animations), True)
 
+        self.anim_orig = copy.deepcopy(animations)
+        self.colorarray = []
         self.name_map = {}
         self.anim_cfgs = []
 
@@ -148,13 +151,17 @@ class RemoteControl(collection.Collection):
             self.stop_animation()
 
     # API Handlers
-    def run_animation(self, name=None):
+    def run_animation(self, name=None, save_base=True):
         if name is None:
             name = self.default
 
         if name not in self.name_map:
             return False, 'Invalid animation name: {}'.format(name)
 
+        if save_base:
+            self.base_name = name
+            self.colorarray = []
+        
         if self.current_animation:
             self.current_animation.cleanup(clean_layout=False)
             self.index = -1
@@ -165,21 +172,42 @@ class RemoteControl(collection.Collection):
         return True, None
 
     def set_color_animation(self, data):
-        # if name is None:
-        #     name = self.default
 
-        # if name not in self.name_map:
-        #     return False, 'Invalid animation name: {}'.format(name)
-
-        # if self.current_animation:
-        #     self.current_animation.cleanup(clean_layout=False)
-        #     self.index = -1
         args = data.split('/')
+        r = int(args[0])
+        g = int(args[1])
+        b = int(args[2])
 
-        log.info('Color: [' + args[0] + ',' + args[1] + ',' + args[2] + '], Type: ' + args[3])
-        # self.index = self.name_map[name]
-        # self.current_animation.start()
-        return True, None
+        newName = self.base_name + uuid.uuid4().hex
+        matched = False
+
+        append = True if args[3] == 'append' else False
+
+        for i, anim in enumerate(self.anim_orig):
+            if anim['animation']['name'] == self.base_name:
+                if 'color' in anim['animation'] or 'colors' in anim['animation']:
+                    newAnim = copy.deepcopy(anim)
+                    if 'color' in anim['animation']:
+                        newColor = [r, g, b]
+                        newAnim['animation']['color'] = newColor
+                    if 'colors' in anim['animation']:
+                        if append:
+                            if len(self.colorarray) == 0:
+                                self.colorarray = copy.deepcopy(newAnim['animation']['colors'])
+                            self.colorarray.append([r, g, b])
+                        else:
+                            self.colorarray = [[r, g, b]]
+                        newAnim['animation']['colors'] = self.colorarray
+                    self.animations.append(self._make_animation(newAnim))
+                    self.name_map[newName] = len(self.animations) - 1
+                    matched = True
+                    break
+
+        if not matched:
+            log.info('Did not find animation')
+            return True, None
+
+        return self.run_animation(newName, False)
 
     def stop_animation(self, data):
         return self.run_animation()

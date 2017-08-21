@@ -59,7 +59,7 @@ function hide_btn_loading(id){
     $('#' + id).html(display);
 }
 
-function add_button(config, click_func, dest='#button_list'){
+function add_button(config, click_func, dest='#button_list_int'){
     var div = document.createElement('div');
     div.className = 'btn';
     div.style.background = config.bgcolor;
@@ -174,20 +174,35 @@ function stop_animation(name, id){
 }
 
 function setupColorPicker() {
-    var canvas = document.getElementById("colorPicker");
-    var context = canvas.getContext("2d");
+    $('#colorPicker').on('click', clickColor);
+    $('#colorPicker').on('tap', clickColor);
+    resizeCanvas();
+    $(window).on('resize', function(){ resizeCanvas(); });
+}
 
+function clickColor(e) {
+    var canvas = document.getElementById("colorPicker");
+    var r = canvas.getBoundingClientRect();
+    var context = canvas.getContext("2d");
+    var color = context.getImageData((e.clientX - r.left), e.clientY - r.top, 1, 1).data;
+    var type = e.shiftKey ? 'append' : 'replace';
+    setColorAnimation(color[0], color[1], color[2], type);
+}
+
+function resizeCanvas() {
+    var canvas = document.getElementById("colorPicker");
+    var newWidth = canvas.parentElement.offsetWidth;
+    var newHeight = newWidth * 0.8;
+
+    canvas.setAttribute("width", (newWidth + 'px'));
+    canvas.setAttribute("height", (newHeight + 'px'));
+
+    var context = canvas.getContext("2d");
     var imageObj = new Image();
     imageObj.src = "/colormap.png";
     imageObj.onload = function(){
-        context.drawImage(imageObj, 0, 0, imageObj.naturalWidth, imageObj.naturalHeight, 0, 0, 640, 512);
+        context.drawImage(imageObj, 0, 0, imageObj.naturalWidth, imageObj.naturalHeight, 0, 0, newWidth, newHeight);
     };
-
-    canvas.onmousemove = function(e) {
-        var r = canvas.getBoundingClientRect();
-        var color = context.getImageData((e.clientX - r.left), e.clientY - r.top, 1, 1).data;
-        setColorAnimation(color[0], color[1], color[2], 'fullStrip');
-    }
 }
 
 function setColorAnimation(r, g, b, type){
