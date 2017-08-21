@@ -176,8 +176,19 @@ function stop_animation(name, id){
 function setupColorPicker() {
     $('#colorPicker').on('click', clickColor);
     $('#colorPicker').on('tap', clickColor);
+    $('#color-toggle').on('click', changeColorToggle);
+    $('#color-toggle').on('tap', changeColorToggle);
     resizeCanvas();
     $(window).on('resize', function(){ resizeCanvas(); });
+
+}
+
+function changeColorToggle(e){
+    if ($('#color-toggle').text() == 'append') {
+        $('#color-toggle').text('replace')
+    } else {
+        $('#color-toggle').text('append')
+    }
 }
 
 function clickColor(e) {
@@ -185,7 +196,7 @@ function clickColor(e) {
     var r = canvas.getBoundingClientRect();
     var context = canvas.getContext("2d");
     var color = context.getImageData((e.clientX - r.left), e.clientY - r.top, 1, 1).data;
-    var type = e.shiftKey ? 'append' : 'replace';
+    var type = $('#color-toggle').text();
     setColorAnimation(color[0], color[1], color[2], type);
 }
 
